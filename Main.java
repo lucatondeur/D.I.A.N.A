@@ -11,7 +11,7 @@ public class Main {
             int candleLength = scanner.nextInt();
             client.connect(ticker, candleLength);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error: exiting program");
         }
     }
 }
