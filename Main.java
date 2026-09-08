@@ -7,7 +7,9 @@ public class Main {
             Client client = new Client();
             System.out.print("What ticker would you like to track? ");
             String ticker = scanner.nextLine();
-            client.connect(ticker);
+            System.out.print("What candle length would you like to observe? ");
+            int candleLength = scanner.nextInt();
+            client.connect(ticker, candleLength);
         } catch (Exception e) {
             e.printStackTrace();
         }

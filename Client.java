@@ -7,7 +7,7 @@ import java.util.concurrent.CompletionStage;
 public class Client {
     private WebSocket webSocket;
 
-    public void connect(String ticker) throws InterruptedException {
+    public void connect(String ticker, int candleLength) throws InterruptedException {
 
         double open = 0;
         double high = 0;
@@ -34,7 +34,7 @@ public class Client {
                 ProtobufDecoder protobuf = new ProtobufDecoder();
 
                 CandleConstructor candles = new CandleConstructor();
-                candles.candleConstructor(protobuf.protobufDecoder(data.toString()), candleData, 1);
+                candles.candleConstructor(protobuf.protobufDecoder(data.toString()), candleData, candleLength);
 
                 webSocket.request(1);
                 return null;
