@@ -34,9 +34,11 @@ public class CandleConstructor {
             return candleData;
         }
 
-        if (candleData[4] != currentBucketId) {
+        if (candleData[4] != currentBucketId && candleData[4] == currentBucketId - candleLength) {
 
-            printCandle(candleData, candleLength);
+            DataExporter csvSave = new DataExporter();
+            String fileName = data[0] + ".csv";
+            csvSave.dataExporter(fileName, printCandle(candleData, candleLength));
             System.out.println();
 
             candleData[0] = currentPrice;
@@ -63,7 +65,7 @@ public class CandleConstructor {
         return candleData;
     }
 
-    private void printCandle(double[] candleData, int candleLength) {
+    public String printCandle(double[] candleData, int candleLength) {
 
         long completedBucketMilli;
 
@@ -83,7 +85,7 @@ public class CandleConstructor {
 
         System.out.print("\033[1A\033[2K");
         System.out.flush();
-        System.out.printf("[%dm | %s UTC] Open: %f | High: \033[32m%f\033[0m | Low: \033[31m%f\033[0m | Close: %f%n",
+        String output = String.format("[%dm | %s UTC] Open: %f | High: \033[32m%f\033[0m | Low: \033[31m%f\033[0m | Close: %f%n",
             candleLength,
             timeString,
             candleData[0],
@@ -91,5 +93,17 @@ public class CandleConstructor {
             candleData[2],
             candleData[3]
         );
+        System.out.printf(output);
+
+        String savedOutput = String.format("%dm, %s UTC, %f, %f, %f, %f%n",
+            candleLength,
+            timeString,
+            candleData[0],
+            candleData[1],
+            candleData[2],
+            candleData[3]
+        );
+
+        return savedOutput;
     }
 }
