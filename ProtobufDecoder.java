@@ -4,10 +4,15 @@ import java.util.HexFormat;
 import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 
 public class ProtobufDecoder {
-    public float protobufDecoder(String protobuf) {
+    public String[] protobufDecoder(String protobuf) {
+        //System.out.println(protobuf);
 
         byte[] decodedBytes = Base64.getDecoder().decode(protobuf);
 
@@ -16,8 +21,9 @@ public class ProtobufDecoder {
         int dataLength = 0;
         String tickerName = "";
 
-        float price = 0;
-        long time = 0;
+        double price = 0;
+        String formattedDate = "";
+        long epochTime = 0;
 
         for (int i = 0; i < decodedBytes.length; ) {
             int tag = decodedBytes[i] & 0xFF;
@@ -35,8 +41,29 @@ public class ProtobufDecoder {
                 //break;
             }
             else if ((wireType == 0) && (fieldNumber == 3)) {
-                time = 0;
-                i += 6;
+                int start = i + 1;
+                long varintResult = 0;
+                int shift = 0;
+
+                while (start < decodedBytes.length) {
+
+                    byte b = decodedBytes[start];
+                    varintResult = varintResult | (long) (b & 0x7F) << shift;
+                    start++;
+
+                    if ((b & 0x80) == 0) {
+                    break;
+                    }
+                    shift += 7;
+                }
+                long epochTimeUnsigned = varintResult;
+                epochTime = epochTimeUnsigned / 2;
+
+                Instant instant = Instant.ofEpochSecond(epochTime / 1000);
+                LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-mm-dd HH:mm:ss"));
+
+                i = start;
             }
             else {
             break;
@@ -46,8 +73,10 @@ public class ProtobufDecoder {
         String hex = HexFormat.ofDelimiter(" ").formatHex(decodedBytes);
 
         String readableBytes = new String(decodedBytes, StandardCharsets.UTF_8);
-        System.out.println("Ticker: " + tickerName + " | Price: " + price);
-        return price;
+        //System.out.println("Ticker: " + tickerName + " | Time: " + formattedDate + " | Price: " + price);
+
+        String[] data = {tickerName, formattedDate, price + "", epochTime + ""};
+        return data;
 
     }
 }
